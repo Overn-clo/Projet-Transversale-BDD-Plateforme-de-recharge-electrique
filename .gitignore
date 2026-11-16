@@ -1,45 +1,37 @@
-# This file contains ignores for build artifacts from standard builds.
-# Auxiliary files from local workflows, your preferred editor, etc. should
-# be ignored locally using $GIT_DIR/info/exclude or ~/.gitexclude.
+# ============================================================================
+# PROJET URBANWATT - .gitignore
+# ============================================================================
 
-# Global excludes across all subdirectories
-*.o
-*.obj
-*.bc
-*.so
-*.so.[0-9]
-*.so.[0-9].[0-9]
-*.so.[0-9].[0-9][0-9]
-*.dylib
-*.dll
-*.exp
-*.a
-*.mo
-*.pot
-objfiles.txt
-.deps/
-*.gcno
-*.gcda
-*.gcov
-*.gcov.out
-lcov*.info
-coverage/
-coverage-html-stamp
-*.vcproj
-*.vcxproj
-win32ver.rc
-*.exe
-lib*dll.def
-lib*.pc
+# 1. Secrets et variables d'environnement (Critère de sécurité obligatoire)
+.env
+*.env
+!.env.example
+infra/.env
 
-# Local excludes in root directory
-/GNUmakefile
-/config.cache
-/config.log
-/config.status
-/pgsql.sln
-/pgsql.sln.cache
-/Debug/
-/Release/
-/tmp_install/
-/portlock/
+# 2. Sauvegardes PostgreSQL et dumps (Interdiction de publier les dumps)
+sauvegardes/*.dump
+sauvegardes/*.sql
+sauvegardes/*.bak
+sauvegardes/*.tar
+sauvegardes/*.gz
+!sauvegardes/procedure_sauvegarde.md
+
+# 3. Environnement Python / FastAPI (Dossier app/)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# 4. Volumes locaux Docker et logs PostgreSQL
+infra/pgdata/
+*.log
+
+# 5. Fichiers système et éditeurs (OS / IDE)
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
