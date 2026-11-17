@@ -10,6 +10,7 @@ URBANWATT exploite un réseau national de 120 stations et 600 bornes de recharge
 │   ├── 02_dictionnaire_donnees.md  # Dictionnaire complet des 9 tables
 │   ├── 03_plan_taches.md           # Répartition des tâches de l'équipe projet
 │   └── 04_strategie_et_tests.md    # Cahier de tests (5 scénarios + sécurité) et analyse des risques
+│   └── schema_relationnel_urbanwatt.png    # Schéma relationnel des tables de la BDD
 ├── sql/                            # Scripts SQL PostgreSQL
 │   ├── 01_schema.sql               # Création des tables, contraintes (PK, FK, CHECK, UNIQUE) et index
 │   ├── 02_import_et_verif.sql      # Procédure d'import ordonnée des 9 CSV et contrôles d'intégrité
