@@ -40,6 +40,8 @@ L'objectif du système d'information URBANWATT est de remplacer les suivis manue
 
 ### 2.1 Diagramme Entité-Association (Format Mermaid)
 
+### 2.1 Diagramme Entité-Association (Format Mermaid)
+
 mermaid
 erDiagram
     STATIONS {
@@ -110,27 +112,27 @@ erDiagram
         text compte_rendu
     }
 
-    STATIONS ||--|{ BORNES : "HEBERGER (1,N - 1,1)"
-    CLIENTS ||--o{ VEHICULES : "POSSEDER (0,N - 1,1)"
-    BORNES ||--o{ SESSIONS_RECHARGE : "ALIMENTER (0,N - 1,1)"
-    VEHICULES ||--o{ SESSIONS_RECHARGE : "EFFECTUER (0,N - 1,1)"
-    SESSIONS_RECHARGE ||--o| PAIEMENTS : "GENERER (0,1 - 1,1)"
-    BORNES ||--o{ INCIDENTS : "SUBIR (0,N - 1,1)"
-    INCIDENTS ||--o{ INTERVENTIONS : "DECLENCHER (0,N - 1,1)"
-    TECHNICIENS ||--o{ INTERVENTIONS : "REALISER (0,N - 1,1)"
+    STATIONS ||--|{ BORNES : "HÉBERGE (1,N - 1,1)"
+    CLIENTS ||--o{ VEHICULES : "POSSÈDE (0,N - 1,1)"
+    BORNES ||--o{ SESSIONS_RECHARGE : "ALIMENTE (0,N - 1,1)"
+    VEHICULES ||--o{ SESSIONS_RECHARGE : "EFFECTUE (0,N - 1,1)"
+    SESSIONS_RECHARGE ||--o| PAIEMENTS : "GÉNÈRE / PAIE (0,1 - 1,1)"
+    BORNES ||--o{ INCIDENTS : "SUBIT (0,N - 1,1)"
+    INCIDENTS ||--o{ INTERVENTIONS : "NÉCESSITE (0,N - 1,1)"
+    TECHNICIENS ||--o{ INTERVENTIONS : "INTERVIENT (0,N - 1,1)"
         
 ### 2.2 Récapitulatif des Associations et Cardinalités (Notation Merise)
 
 | Association | Entité A | Cardinalité A | Entité B | Cardinalité B | Règle de dérivation MLD |
 | :--- | :--- | :---: | :--- | :---: | :--- |
-| **HEBERGER** | STATIONS | `1,N` | BORNES | `1,1` | Migration de `#id_station` (`NOT NULL`) dans `bornes` |
-| **POSSEDER** | CLIENTS | `0,N` | VEHICULES | `1,1` | Migration de `#id_client` (`NOT NULL`) dans `vehicules` |
-| **ALIMENTER** | BORNES | `0,N` | SESSIONS_RECHARGE | `1,1` | Migration de `#id_borne` (`NOT NULL`) dans `sessions_recharge` |
-| **EFFECTUER** | VEHICULES | `0,N` | SESSIONS_RECHARGE | `1,1` | Migration de `#id_vehicule` (`NOT NULL`) dans `sessions_recharge` |
-| **GENERER** | SESSIONS_RECHARGE | `0,1` | PAIEMENTS | `1,1` | Migration de `#id_session` (`NOT NULL UNIQUE`) dans `paiements` |
-| **SUBIR** | BORNES | `0,N` | INCIDENTS | `1,1` | Migration de `#id_borne` (`NOT NULL`) dans `incidents` |
-| **DECLENCHER** | INCIDENTS | `0,N` | INTERVENTIONS | `1,1` | Migration de `#id_incident` (`NOT NULL`) dans `interventions` |
-| **REALISER** | TECHNICIENS | `0,N` | INTERVENTIONS | `1,1` | Migration de `#id_technicien` (`NOT NULL`) dans `interventions` |
+| **HÉBERGE** | STATIONS | `1,N` | BORNES | `1,1` | Migration de `#id_station` (`NOT NULL`) dans `bornes` |
+| **POSSÈDE** | CLIENTS | `0,N` | VEHICULES | `1,1` | Migration de `#id_client` (`NOT NULL`) dans `vehicules` |
+| **ALIMENTE** | BORNES | `0,N` | SESSIONS_RECHARGE | `1,1` | Migration de `#id_borne` (`NOT NULL`) dans `sessions_recharge` |
+| **EFFECTUE** | VEHICULES | `0,N` | SESSIONS_RECHARGE | `1,1` | Migration de `#id_vehicule` (`NOT NULL`) dans `sessions_recharge` |
+| **GÉNÈRE / PAIE**| SESSIONS_RECHARGE | `0,1` | PAIEMENTS | `1,1` | Migration de `#id_session` (`NOT NULL UNIQUE`) dans `paiements` |
+| **SUBIT** | BORNES | `0,N` | INCIDENTS | `1,1` | Migration de `#id_borne` (`NOT NULL`) dans `incidents` |
+| **NÉCESSITE** | INCIDENTS | `0,N` | INTERVENTIONS | `1,1` | Migration de `#id_incident` (`NOT NULL`) dans `interventions` |
+| **INTERVIENT** | TECHNICIENS | `0,N` | INTERVENTIONS | `1,1` | Migration de `#id_technicien` (`NOT NULL`) dans `interventions` |
 
 ---
 
