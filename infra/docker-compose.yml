@@ -1,20 +1,24 @@
+
 services:
   db:
     image: postgres:16
     container_name: urbanwatt
     restart: unless-stopped
+
     env_file:
-      
-.env
-  ports:
-"${POSTGRES_PORT}:5432"
-volumes:
-urbanwatt_data:/var/lib/postgresql/data
-healthcheck:
-  test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
-  interval: 10s
-  timeout: 5s
-  retries: 5
+      - .env
+
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT}:5432"
+
+    volumes:
+      - urbanwatt_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   urbanwatt_data:
