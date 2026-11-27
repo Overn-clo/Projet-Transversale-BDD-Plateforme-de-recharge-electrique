@@ -1,6 +1,6 @@
--- ============================================================================
--- PROJET URBANWATT - sql/03_requetes.sql (Questions 01 à 08 - Mathieu)
--- ============================================================================
+-- ==================================================================================================
+-- PROJET URBANWATT - sql/03_requetes.sql (Questions 01 à 08 - Mathieu) (Questions 09 à 15 - Thomas)
+-- ==================================================================================================
 
 -- Q01 : Afficher les clients ayant réalisé au moins une session de recharge dans la station ST-LIL, sans doublon, avec leur nom et leur prénom.
 -- Justification : Chaînage des jointures clients -> vehicules -> sessions_recharge -> bornes -> stations filtré sur ST-LIL, avec DISTINCT sur id_client/nom/prénom pour éliminer les doublons sans confondre d'éventuels homonymes.
@@ -83,3 +83,140 @@ JOIN stations st ON b.id_station = st.id_station
 LEFT JOIN interventions itv ON i.id_incident = itv.id_incident
 WHERE st.code_station = 'ST-BOR'
 ORDER BY i.date_signalement DESC;
+
+-- Q09 : Sessions annulées ou interrompues dans ST-NAN
+-- Justification : les jointures permettent de relier la session à son véhicule et à la station par l'intermédiaire de la borne. IN sélectionne les deux statuts demandés.
+SELECT
+    v.immatriculation,
+    sr.debut_session,
+    sr.statut
+FROM sessions_recharge sr
+JOIN vehicules v
+    ON sr.id_vehicule = v.id_vehicule
+JOIN bornes b
+    ON sr.id_borne = b.id_borne
+JOIN stations st
+    ON b.id_station = st.id_station
+WHERE st.code_station = 'ST-NAN'
+  AND sr.statut IN ('annulee', 'interrompue')
+ORDER BY sr.debut_session;
+
+-- Q10 : Clients ayant réalisé une session terminée de plus de 30 kWh
+-- Justification : DISTINCT élimine les doublons. Le filtre conserve uniquement les sessions terminées dont l'énergie dépasse strictement 30 kWh.
+SELECT DISTINCT
+    c.id_client,
+    c.prenom,
+    c.nom
+FROM clients c
+JOIN vehicules v
+    ON c.id_client = v.id_client
+JOIN sessions_recharge sr
+    ON v.id_vehicule = sr.id_vehicule
+WHERE sr.statut = 'terminee'
+  AND sr.energie_kwh > 30
+ORDER BY c.nom, c.prenom;
+
+-- Q11 : Nombre de bornes par état et par station
+-- Justification: LEFT JOIN conserve toutes les stations. FILTER permet de compter séparément les bornes selon leur état.
+SELECT
+    st.code_station,
+    st.nom_station,
+    COUNT(b.id_borne) FILTER (
+        WHERE b.etat = 'disponible'
+    ) AS bornes_disponibles,
+    COUNT(b.id_borne) FILTER (
+        WHERE b.etat = 'maintenance'
+    ) AS bornes_maintenance,
+    COUNT(b.id_borne) FILTER (
+        WHERE b.etat = 'hors_service'
+    ) AS bornes_hors_service
+FROM stations st
+LEFT JOIN bornes b
+    ON st.id_station = b.id_station
+GROUP BY st.id_station, st.code_station, st.nom_station
+ORDER BY st.code_station;
+
+-- Q12 : Session terminée avec l'énergie maximale à ST-LIL
+-- Justification : la sous-requête calcule l'énergie maximale pour ST-LIL. La requête principale récupère les sessions qui ont exactement cette valeur.
+SELECT
+    sr.id_session,
+    sr.debut_session,
+    v.immatriculation,
+    b.code_borne,
+    sr.energie_kwh
+FROM sessions_recharge sr
+JOIN bornes b
+    ON sr.id_borne = b.id_borne
+JOIN stations st
+    ON b.id_station = st.id_station
+JOIN vehicules v
+    ON sr.id_vehicule = v.id_vehicule
+WHERE st.code_station = 'ST-LIL'
+  AND sr.statut = 'terminee'
+  AND sr.energie_kwh = (
+      SELECT MAX(sr2.energie_kwh)
+      FROM sessions_recharge sr2
+      JOIN bornes b2
+          ON sr2.id_borne = b2.id_borne
+      JOIN stations st2
+          ON b2.id_station = st2.id_station
+      WHERE st2.code_station = 'ST-LIL'
+        AND sr2.statut = 'terminee'
+  );
+
+-- Q13 : Nombre de véhicules distincts par station
+-- Justification : COUNT(DISTINCT ...) évite de compter plusieurs fois un véhicule ayant rechargé plusieurs fois dans une même station. Le filtre placé dans la jointure conserve les stations sans session terminée.
+SELECT
+    st.code_station,
+    st.nom_station,
+    COUNT(DISTINCT sr.id_vehicule) AS nombre_vehicules
+FROM stations st
+LEFT JOIN bornes b
+    ON st.id_station = b.id_station
+LEFT JOIN sessions_recharge sr
+    ON b.id_borne = sr.id_borne
+   AND sr.statut = 'terminee'
+GROUP BY st.id_station, st.code_station, st.nom_station
+ORDER BY st.code_station;
+
+-- Q14 : Énergie moyenne par véhicule
+-- Justification : LEFT JOIN conserve tous les véhicules. AVG ignore les valeurs NULL : un véhicule sans session terminée aura donc une moyenne NULL, et non zéro.
+SELECT
+    v.immatriculation,
+    v.marque,
+    v.modele,
+    ROUND(AVG(sr.energie_kwh), 2) AS energie_moyenne_kwh
+FROM vehicules v
+LEFT JOIN sessions_recharge sr
+    ON v.id_vehicule = sr.id_vehicule
+   AND sr.statut = 'terminee'
+GROUP BY v.id_vehicule, v.immatriculation, v.marque, v.modele
+ORDER BY v.immatriculation;
+
+-- Q15 : Énergie maximale par station et borne associée
+-- Justification : la CTE sessions_max calcule le maximum par station. La requête principale retrouve la borne associée à cette valeur.
+WITH sessions_max AS (
+    SELECT
+        b.id_station,
+        MAX(sr.energie_kwh) AS energie_max
+    FROM bornes b
+    JOIN sessions_recharge sr
+        ON b.id_borne = sr.id_borne
+    WHERE sr.statut = 'terminee'
+    GROUP BY b.id_station
+)
+SELECT
+    st.code_station,
+    st.nom_station,
+    b.code_borne,
+    sm.energie_max
+FROM sessions_max sm
+JOIN stations st
+    ON sm.id_station = st.id_station
+JOIN bornes b
+    ON st.id_station = b.id_station
+JOIN sessions_recharge sr
+    ON b.id_borne = sr.id_borne
+   AND sr.statut = 'terminee'
+   AND sr.energie_kwh = sm.energie_max
+ORDER BY st.code_station, b.code_borne;

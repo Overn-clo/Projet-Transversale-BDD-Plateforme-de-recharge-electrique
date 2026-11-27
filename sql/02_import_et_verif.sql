@@ -1,5 +1,5 @@
 --pour vérifier si les tables sont bien là
-docker exec -it urbanwatt psql -U urbanwatt_user -d urbanwatt 
+SELECT *
 
 --verifie les relations entre les tables
 SELECT
