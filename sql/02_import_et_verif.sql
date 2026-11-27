@@ -1,5 +1,8 @@
 --pour vérifier si les tables sont bien là
-SELECT *
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public'
+ORDER BY table_name;
 
 --verifie les relations entre les tables
 SELECT
